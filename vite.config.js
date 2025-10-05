@@ -3,6 +3,6 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/',               // <-- change from '/rivensite/' to '/'
+  base: '/rivensite/',               // <-- change from '/rivensite/' to '/'
   build: { outDir: 'docs' }
 })
