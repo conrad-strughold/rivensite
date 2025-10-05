@@ -2,15 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 
 // Neutrl-style single-file React landing page
-// - TailwindCSS utility classes
-// - Host Grotesk as primary font (see NOTE below)
-// - Clean navbar, bold hero, soft gradients, glass cards, pill buttons
-// - Sections: Hero, Logos, Features, How it works, Metrics, CTA, Footer
-//
-// NOTE: Ensure Host Grotesk is loaded in your app root (index.html or _document.tsx):
-// <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-// Then extend Tailwind to use it: theme.extend.fontFamily.sans = ["Host Grotesk", "ui-sans-serif", "system-ui"]
-// Or, simplest: add className="font-[Host_Grotesk]" on <body> and include the link above.
+// Tailwind + Host Grotesk
 
 const gradientBg =
   "bg-[radial-gradient(80%_60%_at_50%_-10%,rgba(99,102,241,0.25),rgba(99,102,241,0)_60%),radial-gradient(70%_50%_at_90%_10%,rgba(16,185,129,0.2),rgba(16,185,129,0)_60%),radial-gradient(60%_50%_at_10%_10%,rgba(236,72,153,0.18),rgba(236,72,153,0)_50%)]";
@@ -35,17 +27,8 @@ function diagramCandleAnchors(){const {boxH}=diagramLayout();const {ptY,ftY}=dia
 function diagramCoinCount(){return 14;}
 
 /** -------------------------
- * Chain Selection Bar (JSX version)
- * --------------------------
- * Visual match goals:
- * - Rounded pill container
- * - Even squared slots with subtle separators
- * - Circular icons with ring/border
- * - Mixed chain accent colors (close to screenshot)
- * - Hover = soft ring glow, Active = brighter ring + slight raise
- * - Scrollable on small screens, no scrollbars shown
- */
-// Replace your CHAINS with this:
+ * Chain Selection Bar (JSX version) — mobile fixes
+ * -------------------------- */
 const CHAINS = [
   {
     id: "eth",
@@ -109,8 +92,6 @@ const CHAINS = [
   },
 ];
 
-
-// Replace your ChainIcon with this:
 function ChainIcon({ chain, active }) {
   return (
     <div
@@ -123,13 +104,12 @@ function ChainIcon({ chain, active }) {
       <img
         src={chain.icon}
         alt={chain.label}
-        className="h-9 w-9 rounded-full select-none pointer-events-none"
+        className="h-9 w-9 rounded-full select-none pointer-events-none object-cover"
         draggable={false}
       />
     </div>
   );
 }
-
 
 function ChainButton({ chain, selected, onSelect, showDivider }) {
   return (
@@ -157,21 +137,14 @@ function ChainSelectionBar() {
   const [selected, setSelected] = useState("eth");
   return (
     <div className="mt-2 mb-4">
-      <div
-        className={[
-          "rounded-2xl",
-          "bg-white/[0.04]",
-          "border border-white/10",
-          "overflow-hidden",
-        ].join(" ")}
-      >
+      <div className={["rounded-2xl","bg-white/[0.04]","border border-white/10","overflow-hidden"].join(" ")}>
         <div
           className={[
             "flex gap-0",
             "overflow-x-auto no-scrollbar",
-            // symmetric padding so first/last icons align perfectly
-            "py-1 px-2",
+            "py-1 px-3",
             "justify-start",
+            "edge-fade",
           ].join(" ")}
         >
           {CHAINS.map((c, i) => (
@@ -183,49 +156,18 @@ function ChainSelectionBar() {
               showDivider={i !== CHAINS.length - 1}
             />
           ))}
+          <div className="shrink-0 w-2" />
         </div>
       </div>
     </div>
   );
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* ================= Diagram ================= */
 function MiniSplitDiagram(){
   const L=diagramLabels();
   const {ptY,ftY}=diagramPositions();
   const {boxH,lpY,splitY,lpX,splitX,targetX}=diagramLayout();
-  const coinCount=diagramCoinCount();
-  const floatDur=diagramFloatDurations();
-  const coinEndOffset=diagramCoinEndYOffset();
-  const streamDots=diagramStreamDotCount();
   const boxW=140, boxRX=10;
   const ptCenterY=ptY+boxH/2; const ftCenterY=ftY+boxH/2;
   return (
@@ -247,8 +189,7 @@ function MiniSplitDiagram(){
         <text x={lpX+boxW/2} y={lpY+boxH/2+5} textAnchor="middle" fontSize="14" fontWeight="700" fill="#e5e7eb">{L.lp}</text>
 
         {/* LP → Split stream */}
-        <path id="lpPath" d={`M${lpX+boxW} ${lpY+boxH/2} H ${splitX-20}`} fill="none"/>
-        {Array.from({length:streamDots}).map((_,i)=>(
+        {Array.from({length:24}).map((_,i)=>(
           <circle key={`flow${i}`} r="2.2" fill="#a5b4fc" opacity="0.6">
             <animateMotion dur="3s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" path={`M${lpX+boxW} ${lpY+boxH/2} H ${splitX-20}`} begin={`${i*0.12}s`}/>
             <animate attributeName="opacity" values="0;1;0" keyTimes="0;0.5;1" dur="3s" begin={`${i*0.12}s`} repeatCount="indefinite"/>
@@ -264,13 +205,13 @@ function MiniSplitDiagram(){
         <path d={`M${splitX + 18} ${splitY - 6} C ${splitX + 70} ${splitY - 6}, ${splitX + 150} ${ptCenterY}, ${targetX} ${ptCenterY}`} stroke="#a5b4fc" strokeWidth="1.5" opacity="0.6" fill="none" markerEnd="url(#arrow)"/>
         <path d={`M${splitX + 18} ${splitY + 6} C ${splitX + 70} ${splitY + 6}, ${splitX + 150} ${ftCenterY}, ${targetX} ${ftCenterY}`} stroke="#a5b4fc" strokeWidth="1.5" opacity="0.6" fill="none" markerEnd="url(#arrow)"/>
 
-        {/* PT box */}
+        {/* PT */}
         <g transform={`translate(0,0)`}>
           <animateTransform attributeName="transform" type="translate" dur={`${diagramFloatDurations().pt}s`} values="0 0; 0 -10; 0 6; 0 -4; 0 0" keyTimes="0;0.25;0.5;0.75;1" repeatCount="indefinite"/>
           <rect x={targetX} y={ptY} width={boxW} height={boxH} rx={12} fill={tokenFillColor()} stroke="#a5b4fc" strokeWidth="1.5"/>
           <text x={targetX+boxW/2} y={ptY+boxH/2+5} textAnchor="middle" fontSize="14" fontWeight="700" fill="#e8ecff">{L.pt}</text>
         </g>
-        {/* FT box */}
+        {/* FT */}
         <g transform={`translate(0,0)`}>
           <animateTransform attributeName="transform" type="translate" dur={`${diagramFloatDurations().ft}s`} values="0 0; 0 -12; 0 8; 0 -6; 0 0" keyTimes="0;0.25;0.5;0.75;1" repeatCount="indefinite"/>
           <rect x={targetX} y={ftY} width={boxW} height={boxH} rx={12} fill={tokenFillColor()} stroke="#a5b4fc" strokeWidth="1.5"/>
@@ -281,8 +222,8 @@ function MiniSplitDiagram(){
         {Array.from({length:diagramCoinCount()}).map((_,i)=>{
           const x=targetX+12+(i%7)*((boxW-24)/6);
           const startY=ftY-60-i*6;
-          const endY=ftY+diagramCoinEndYOffset();
-          const d=diagramCoinTiming().base+(i%5)*diagramCoinTiming().step;
+          const endY=ftY+2;
+          const d=1.6+(i%5)*0.2;
           const delay=i*0.12;
           return(
             <g key={`coin${i}`}>
@@ -302,13 +243,13 @@ function MiniSplitDiagram(){
 
 export default function NeutrlStyleLanding() {
   return (
-    <div className={`min-h-screen ${gradientBg} text-white selection:bg-white/20`}> 
+    <div className={`min-h-screen ${gradientBg} text-white selection:bg-white/20 overflow-x-hidden`}>
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_bottom,rgba(10,10,12,0.9),rgba(10,10,12,1))]"/>
 
       {/* Navbar */}
       <header className="sticky top-0 z-40">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <nav className={`mt-6 ${glass} rounded-2xl px-4 py-3 flex items-center justify-between`}> 
+          <nav className={`mt-6 ${glass} rounded-2xl px-4 py-3 flex items-center justify-between`}>
             <div className="flex items-center gap-3">
               <div className="h-9 w-9 rounded-xl bg-white/10 grid place-items-center">
                 <span className="text-lg font-bold">R</span>
@@ -345,7 +286,7 @@ export default function NeutrlStyleLanding() {
             <h1 className="mt-6 text-4xl sm:text-6xl md:text-7xl font-semibold tracking-tight">
               Trade <span className="text-white/90">Liquidity Fees</span>. Own the Flow.
             </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-white/70 text-base sm:text-lg">
+            <p className="mx-auto mt-5 max-w-2xl text-white/70 text-base sm:text-lg break-words">
               Split liquidity into fee and principal. Earn, hedge, or exit anytime — clarity over complexity.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -354,40 +295,39 @@ export default function NeutrlStyleLanding() {
             </div>
             <p className="mt-4 text-xs text-white/50">No wallet? Explore in read-only mode.</p>
 
-            {/* LP → PT + FT animated diagram */}
             <div className="mx-auto mt-6 w-full max-w-4xl">
               <MiniSplitDiagram />
             </div>
           </motion.div>
 
-      {/* Cyberpunk wireframe mesh (super slow) */}
-<style>{`
-  @keyframes meshDrift {
-    0%   { background-position: 0px 0px, 0px 0px; }
-    100% { background-position: 800px 400px, -400px 800px; }
-  }
+          <style>{`
+  @keyframes meshDrift { 0% { background-position: 0px 0px, 0px 0px; } 100% { background-position: 800px 400px, -400px 800px; } }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .edge-fade { 
+    -webkit-mask-image: linear-gradient(to right, transparent 0, black 14px, black calc(100% - 14px), transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0, black 14px, black calc(100% - 14px), transparent 100%);
+  }
 `}</style>
-<div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-  <div
-    className="absolute -inset-[20%] opacity-30"
-    style={{
-      backgroundImage:
-        "linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px)",
-      backgroundSize: "60px 60px, 60px 60px",
-      backgroundPosition: "0px 0px, 0px 0px",
-      transform: "perspective(900px) rotateX(58deg)",
-      animation: "meshDrift 120s linear infinite",
-      WebkitMaskImage:
-        "radial-gradient(ellipse at center, rgba(0,0,0,1) 45%, rgba(0,0,0,0.6) 70%, rgba(0,0,0,0) 95%)",
-      maskImage:
-        "radial-gradient(ellipse at center, rgba(0,0,0,1) 45%, rgba(0,0,0,0.6) 70%, rgba(0,0,0,0) 95%)",
-    }}
-  />
-  <div className="absolute inset-0 bg-[radial-gradient(60%_40%_at_50%_0%,rgba(99,102,241,0.18),transparent_60%)]" />
-  <div className="absolute inset-0 bg-[radial-gradient(40%_30%_at_80%_10%,rgba(16,185,129,0.12),transparent_60%)]" />
-</div>
+          <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+            <div
+              className="absolute -inset-[20%] opacity-30"
+              style={{
+                backgroundImage:
+                  "linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px)",
+                backgroundSize: "60px 60px, 60px 60px",
+                backgroundPosition: "0px 0px, 0px 0px",
+                transform: "perspective(900px) rotateX(58deg)",
+                animation: "meshDrift 120s linear infinite",
+                WebkitMaskImage:
+                  "radial-gradient(ellipse at center, rgba(0,0,0,1) 45%, rgba(0,0,0,0.6) 70%, rgba(0,0,0,0) 95%)",
+                maskImage:
+                  "radial-gradient(ellipse at center, rgba(0,0,0,1) 45%, rgba(0,0,0,0.6) 70%, rgba(0,0,0,0) 95%)",
+              }}
+            />
+            <div className="absolute inset-0 bg-[radial-gradient(60%_40%_at_50%_0%,rgba(99,102,241,0.18),transparent_60%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(40%_30%_at_80%_10%,rgba(16,185,129,0.12),transparent_60%)]" />
+          </div>
 
           {/* Hero Card Preview */}
           <motion.div
@@ -403,7 +343,7 @@ export default function NeutrlStyleLanding() {
                   Liquidity Split
                 </div>
                 <h3 className="mt-3 text-2xl font-semibold">Transform LPs into yield & principal.</h3>
-                <p className="mt-2 text-white/70 text-sm">
+                <p className="mt-2 text-white/70 text-sm break-words pr-1">
                   Deposit once, mint two tokens: the <strong>Fee Token (FT)</strong> captures trading fees, and the <strong>Principal Token (PT)</strong> tracks your base position.
                 </p>
                 <ul className="mt-4 space-y-2 text-sm text-white/75">
@@ -421,7 +361,7 @@ export default function NeutrlStyleLanding() {
               <div className="relative p-6 sm:p-10 bg-gradient-to-br from-white/5 to-transparent">
                 <div className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(50%_40%_at_30%_0%,rgba(99,102,241,0.4),transparent_60%)]"/>
 
-                {/* ===== Chain selection bar (added) ===== */}
+                {/* Chain selection bar */}
                 <ChainSelectionBar />
 
                 <div className="grid gap-3 sm:gap-4 md:gap-5">
@@ -445,7 +385,7 @@ export default function NeutrlStyleLanding() {
                       <div className="text-xl font-semibold mt-1">$9.4M</div>
                     </div>
                   </div>
-                  <div className={`rounded-2xl ${glass} p-4`}> 
+                  <div className={`rounded-2xl ${glass} p-4`}>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-white/70">Your PT</span>
                       <span className="text-white">1,000</span>
@@ -478,23 +418,14 @@ export default function NeutrlStyleLanding() {
         <section id="features" className="mt-20 sm:mt-28">
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              {
-                title: "Split liquidity",
-                desc: "Mint PT + FT to separate yield from exposure. Control outcomes, reduce noise.",
-              },
-              {
-                title: "Sell future fees",
-                desc: "Lock in returns or speculate on future yield — the market decides.",
-              },
-              {
-                title: "Composable by design",
-                desc: "PT and FT plug into vaults, hedges, and on-chain strategies with full interoperability.",
-              },
+              { title: "Split liquidity", desc: "Mint PT + FT to separate yield from exposure. Control outcomes, reduce noise." },
+              { title: "Sell future fees", desc: "Lock in returns or speculate on future yield — the market decides." },
+              { title: "Composable by design", desc: "PT and FT plug into vaults, hedges, and on-chain strategies with full interoperability." },
             ].map((f, i) => (
-              <div key={i} className={`rounded-3xl ${glass} p-6 sm:p-8`}> 
+              <div key={i} className={`rounded-3xl ${glass} p-6 sm:p-8`}>
                 <div className="text-sm text-white/60">0{i + 1}</div>
                 <h3 className="mt-2 text-2xl font-semibold">{f.title}</h3>
-                <p className="mt-2 text-white/70">{f.desc}</p>
+                <p className="mt-2 text-white/70 pr-1 break-words">{f.desc}</p>
                 <div className="mt-6 h-28 rounded-2xl bg-white/5"/>
               </div>
             ))}
@@ -515,7 +446,7 @@ export default function NeutrlStyleLanding() {
                   <div className="h-9 w-9 shrink-0 rounded-xl bg-white/10 grid place-items-center text-sm">{i + 1}</div>
                   <div>
                     <div className="font-semibold">{s.k}</div>
-                    <div className="text-white/70 text-sm mt-1">{s.d}</div>
+                    <div className="text-white/70 text-sm mt-1 break-words">{s.d}</div>
                   </div>
                 </div>
               ))}
@@ -532,7 +463,7 @@ export default function NeutrlStyleLanding() {
               ["9", "Supported Chains"],
               ["99.98%", "Network Uptime"],
             ].map(([n, l], i) => (
-              <div key={i} className={`rounded-3xl ${glass} p-6 text-center`}> 
+              <div key={i} className={`rounded-3xl ${glass} p-6 text-center`}>
                 <div className="text-3xl font-semibold">{n}</div>
                 <div className="text-white/60 mt-1 text-sm">{l}</div>
               </div>
@@ -542,9 +473,9 @@ export default function NeutrlStyleLanding() {
 
         {/* CTA */}
         <section className="mt-20 sm:mt-28 mb-24">
-          <div className={`rounded-3xl ${glass} p-8 sm:p-12 text-center`}> 
+          <div className={`rounded-3xl ${glass} p-8 sm:p-12 text-center`}>
             <h3 className="text-3xl sm:text-4xl font-semibold tracking-tight">Build a calmer, smarter portfolio.</h3>
-            <p className="mt-2 text-white/70 max-w-2xl mx-auto">Connect a wallet to explore flows — or use read-only to see strategies in action.</p>
+            <p className="mt-2 text-white/70 max-w-2xl mx-auto break-words">Connect a wallet to explore flows — or use read-only to see strategies in action.</p>
             <div className="mt-6 flex items-center justify-center gap-3">
               <button className="rounded-full bg-white text-black px-6 py-3 font-semibold hover:bg-white/90 transition">Launch App</button>
               <button className={`rounded-full px-6 py-3 ${glass} hover:bg-white/10`}>Read Docs</button>
@@ -556,7 +487,7 @@ export default function NeutrlStyleLanding() {
       {/* Footer */}
       <footer className="pb-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className={`rounded-3xl ${glass} p-6 sm:p-8`}> 
+          <div className={`rounded-3xl ${glass} p-6 sm:p-8`}>
             <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-8 justify-between">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-8 rounded-xl bg-white/10 grid place-items-center">
